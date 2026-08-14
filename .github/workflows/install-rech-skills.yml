@@ -20,7 +20,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .rech-install/payload.part00a .rech-install/payload.part00b .rech-install/payload.part01 .rech-install/payload.part02 .rech-install/payload.part03 .rech-install/payload.part04a .rech-install/payload.part04b .rech-install/payload.part05 | tr -d '\n' | base64 -d > /tmp/rech-skills.zip
+          cat .rech-install/payload.part00a .rech-install/payload.part00b .rech-install/payload.part01 .rech-install/payload.part02 .rech-install/payload.part03 .rech-install/payload.part04a .rech-install/payload.part04b1 .rech-install/payload.part04b2 .rech-install/payload.part05 | tr -d '\n' | base64 -d > /tmp/rech-skills.zip
           unzip -t /tmp/rech-skills.zip
           rm -rf /tmp/rech-skills
           mkdir -p /tmp/rech-skills
