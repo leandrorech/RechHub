@@ -51,6 +51,7 @@ HARD BLOCKERS: 1 (teste obrigatório falhando)
 VERDICT: BLOCKED
 HARD BLOCKERS: 1 (REGRESSION-GUARDIAN RESULT ausente)
 ```
+
 Nunca `INCONCLUSIVE` — ausência de checagem obrigatória é falha de readiness conhecida, não um problema epistemológico.
 
 **FAIL CRÍTICO:** classificar como `INCONCLUSIVE` (confundindo "não sei se está tudo bem" com "sei que falta uma checagem obrigatória"), ou pior, como `READY` por assumir que ausência de evidência negativa significa segurança.
