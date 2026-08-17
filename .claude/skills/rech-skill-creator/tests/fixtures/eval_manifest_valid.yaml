@@ -1,0 +1,42 @@
+manifest_version: 1
+skill_under_test: "minimal-skill"
+skill_version: "candidate"
+
+evals:
+  - eval_id: "EVAL-A"
+    description: "Eval A - always exits 0 and prints A-ok."
+    category: "functional"
+    execution_mode: "cli_subprocess"
+    input:
+      cmd: ["python3", "-c", "print('A-ok')"]
+    assertions:
+      - type: "exit_code"
+        expected: 0
+      - type: "contains"
+        target: "stdout"
+        expected: "A-ok"
+    primary: true
+    baseline_ref: "ORIGINAL"
+    required: true
+    timeout_seconds: 10
+
+  - eval_id: "EVAL-B"
+    description: "Eval B - always exits 0 and prints B-ok."
+    category: "functional"
+    execution_mode: "cli_subprocess"
+    input:
+      cmd: ["python3", "-c", "print('B-ok')"]
+    assertions:
+      - type: "exit_code"
+        expected: 0
+      - type: "contains"
+        target: "stdout"
+        expected: "B-ok"
+    primary: false
+    baseline_ref: "ORIGINAL"
+    required: true
+    timeout_seconds: 10
+
+metadata:
+  created_by: "test-fixture"
+  created_at: "2026-01-01T00:00:00Z"

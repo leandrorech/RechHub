@@ -1,0 +1,94 @@
+# contract_template.yaml — RECH Skill Creator
+#
+# Canonical, fully-populated contract template (defect #5: this file IS the
+# complete approved contract shape, not a partial stub). Every skill built via
+# rech-skill-creator produces its own `contract.yaml` instance conforming to
+# this schema; schema_validator.py validates instances against the required
+# top-level keys and per-field types defined here.
+#
+# Classification vocabulary (severity, evidence level) reuses RAF exclusively
+# — see references/finding-schema-and-raf-mapping.md in rech-deep-audit. This
+# file introduces NO taxonomy parallel to RAF (a prior rech-skill-creator
+# attempt did exactly that with a 7-label scheme and was rejected for it).
+
+skill_id: example-skill-id            # kebab-case; must match the skill's directory name
+name: example-skill-id                # must match SKILL.md frontmatter `name`
+version: "0.1.0"
+
+goal: |
+  One to three sentences: the single question this skill answers, and why it
+  exists as a separate skill rather than a section of another one.
+
+when_to_use:
+  triggers:
+    - "positive trigger phrase the user might say"
+  negative_triggers:
+    - pattern: "phrase that sounds similar but is NOT this skill"
+      redirect_to: "sibling-skill-id"   # or "none" if there is no better redirect
+
+input_contract:
+  required_fields:
+    - name: "field_name"
+      type: "string"                  # string | path | enum | number | boolean | object | array
+      description: "what this field is and where it comes from"
+  optional_fields:
+    - name: "field_name"
+      type: "string"
+      description: "..."
+
+output_contract:
+  format: "structured-fields"         # structured-fields | markdown-report | json
+  required_fields:
+    - name: "field_name"
+      description: "what this output field means"
+
+skill_schema:
+  frontmatter_fields: ["name", "description"]   # locked to the house convention; do not add fields silently
+  description_max_chars: 1024
+  body_sections: []                   # optional: if the skill enforces a fixed section shape, list it here
+
+execution_environment:
+  requires_code_execution: false      # true only if the skill ships scripts/ with real executable logic
+  execution_boundary: "read-only"     # read-only | safe-non-destructive | full
+  network_access: false
+  external_dependencies: []           # third-party deps beyond the Python standard library, e.g. ["PyYAML"]
+
+risk_side_effects:
+  - description: "what could go wrong if this skill is misused or misfires"
+    mitigation: "how the skill's own design prevents or limits that"
+
+hard_constraints:
+  - "a rule that must never be violated, regardless of user pressure"
+
+preferred_constraints:
+  - "a rule that should be followed absent a documented, explicit exception"
+
+current_constraints:
+  - "a limitation of the current implementation, expected to be lifted later"
+
+non_goals:
+  - "something this skill deliberately does NOT do, to keep its boundary clear"
+
+invariants:
+  - id: "INV-<PROJ>-<AREA>-<N>"        # reuses rech-regression-guardian's ID convention verbatim (INV-/CAP-/SAFE-/REG-)
+    description: "a behavior of this skill that must not regress"
+    severity: "MEDIUM"                # RAF scale only: BLOCKER | CRITICAL | HIGH | MEDIUM | LOW
+    status: "candidate"                # approved | candidate — candidates are never auto-promoted
+
+failure_modes:
+  - description: "a concrete way this skill can fail or be misused"
+    detection: "how a failure of this kind would be noticed"
+    severity: "MEDIUM"                 # RAF scale only
+
+evidence_required:
+  - field: "the output field or claim this evidence backs"
+    minimum_evidence_level: "E3"       # RAF scale only: E0-E5
+
+metadata:
+  owner: ""
+  created: ""
+  last_reviewed: ""
+  status: "draft"                      # draft | proposed | approved | locked
+  tags: []
+  related_skills: []
+  extra: {}                            # open bag for forward-compatible fields not yet formalized above

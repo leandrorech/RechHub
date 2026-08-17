@@ -1,0 +1,59 @@
+skill_id: minimal-skill
+name: minimal-skill
+version: "0.1.0"
+
+goal: |
+  Fixture skill used only by rech-skill-creator's own automated test suite.
+
+when_to_use:
+  triggers:
+    - "run the rech-skill-creator test suite"
+  negative_triggers:
+    - pattern: "anything a real user would ask"
+      redirect_to: "none"
+
+input_contract:
+  required_fields: []
+  optional_fields: []
+
+output_contract:
+  format: "structured-fields"
+  required_fields: []
+
+skill_schema:
+  frontmatter_fields: ["name", "description"]
+  description_max_chars: 1024
+  body_sections: []
+
+execution_environment:
+  requires_code_execution: false
+  execution_boundary: "read-only"
+  network_access: false
+  external_dependencies: []
+
+risk_side_effects: []
+hard_constraints: []
+preferred_constraints: []
+current_constraints: []
+non_goals: []
+
+invariants:
+  - id: "INV-TEST-FIXTURE-001"
+    description: "This fixture must remain minimal and must never be treated as a real skill."
+    severity: "LOW"
+    status: "candidate"
+
+failure_modes: []
+
+evidence_required:
+  - field: "goal"
+    minimum_evidence_level: "E2"
+
+metadata:
+  owner: "test-suite"
+  created: "2026-01-01"
+  last_reviewed: "2026-01-01"
+  status: "draft"
+  tags: ["fixture"]
+  related_skills: []
+  extra: {}

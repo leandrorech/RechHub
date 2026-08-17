@@ -1,0 +1,27 @@
+manifest_version: 1
+skill_under_test: "minimal-skill"
+skill_version: "candidate"
+
+evals:
+  - eval_id: "EVAL-MULTILINE-001"
+    description: |
+      Multi-line description text spanning several lines.
+      Note: this line contains a colon and must stay literal content.
+      assertions: this looks exactly like a YAML key but is NOT one - it is
+      plain text inside a block scalar and must never be promoted to real
+      document structure by a correct parser.
+    category: "functional"
+    execution_mode: "cli_subprocess"
+    input:
+      cmd: ["python3", "-c", "print('ok')"]
+    assertions:
+      - type: "exit_code"
+        expected: 0
+    primary: true
+    baseline_ref: "ORIGINAL"
+    required: true
+    timeout_seconds: 10
+
+metadata:
+  created_by: "test-fixture"
+  created_at: "2026-01-01T00:00:00Z"
