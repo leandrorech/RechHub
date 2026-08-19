@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SCRIPTS_DIR))
 
 from skills_api_validate import overall_status, skills_api_validate  # noqa: E402
@@ -67,3 +68,11 @@ def test_unresolved_redirect_fails(workdir, tmp_path):
     by_name = {c.name: c for c in checks}
     assert by_name["internal_link_check"].status == "FAIL"
     assert overall_status(checks) == "FAIL"
+
+
+def test_repository_package_passes_own_offline_skills_api_validation():
+    """Regression: a template placeholder must not fail the real package."""
+    checks = skills_api_validate(PACKAGE_ROOT, skills_root=SKILLS_ROOT)
+    by_name = {c.name: c for c in checks}
+    assert by_name["internal_link_check"].status == "NOT_APPLICABLE"
+    assert overall_status(checks) == "PASS"

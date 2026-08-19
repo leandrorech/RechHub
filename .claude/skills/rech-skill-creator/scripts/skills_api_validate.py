@@ -75,8 +75,6 @@ def skills_api_validate(pkg_dir: "str | Path", skills_root: "str | Path" = None)
         ))
 
     contract_path = pkg_dir / "contract.yaml"
-    if not contract_path.exists():
-        contract_path = pkg_dir / "contract_template.yaml"
     if skills_root is not None and contract_path.exists():
         skills_root = Path(skills_root)
         sibling_dirs = {p.name for p in skills_root.iterdir() if p.is_dir()}
@@ -95,10 +93,15 @@ def skills_api_validate(pkg_dir: "str | Path", skills_root: "str | Path" = None)
             f"unresolved redirect_to target(s): {unresolved}" if unresolved
             else "all redirect_to values resolve to a sibling directory or are 'none'",
         ))
-    else:
+    elif contract_path.exists():
         checks.append(ApiCheck(
             "internal_link_check", "UNVERIFIED",
-            "no skills_root and/or contract file available to check redirect_to links against",
+            "contract.yaml exists but no skills_root was supplied to resolve redirect_to links",
+        ))
+    else:
+        checks.append(ApiCheck(
+            "internal_link_check", "NOT_APPLICABLE",
+            "no concrete contract.yaml; contract_template.yaml placeholders are not runtime redirect declarations",
         ))
 
     # NOT_APPLICABLE (not UNVERIFIED): there is no documented size-limit constant

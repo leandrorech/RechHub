@@ -13,9 +13,9 @@ evidência não-vazia.
 | `description_charset` | UTF-8 válido, imprimível, sem caracteres de controle. |
 | `naming_rules` | Nome do diretório casa `^[a-z0-9]+(-[a-z0-9]+)*$`. |
 | `frontmatter_name_matches_dir` | `name` do frontmatter bate com o nome do diretório do pacote. |
-| `references_only_md`, `scripts_only_py`, `no_stray_hidden_files` | Regras de tipo de arquivo por pasta. |
+| `references_only_md`, `scripts_only_py`, `no_stray_hidden_files` | Regras de tipo de arquivo por pasta; `.gitignore` é o único hidden file permitido na raiz. |
 | `yaml_well_formed:<arquivo>` | Todo `*.yaml`/`*.yml` do pacote parseia via `yaml.safe_load`. |
-| `internal_link_check` | Todo `redirect_to` em `when_to_use.negative_triggers` do `contract.yaml` resolve para um diretório irmão real (ou é `"none"`). Exige `--skills-root`; sem ele, `UNVERIFIED`. |
+| `internal_link_check` | Todo `redirect_to` em `when_to_use.negative_triggers` de um `contract.yaml` concreto resolve para um diretório irmão real (ou é `"none"`). Com contrato concreto e sem `--skills-root`, retorna `UNVERIFIED`. Se existe apenas `contract_template.yaml`, retorna `NOT_APPLICABLE`: placeholders de template não são redirects de runtime. |
 
 ## Nunca checável neste sandbox — sempre `NOT_APPLICABLE`, nunca `PASS`
 

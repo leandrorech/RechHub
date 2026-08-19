@@ -23,6 +23,7 @@ from rsc_common import load_yaml, load_yaml_str  # noqa: E402
 
 ALLOWED_REFERENCE_SUFFIXES = {".md"}
 ALLOWED_SCRIPT_SUFFIXES = {".py"}
+ALLOWED_ROOT_HIDDEN_FILES = {".gitignore"}
 
 
 @dataclass
@@ -107,7 +108,9 @@ def validate_package(pkg_dir: "str | Path") -> list:
 
     stray = sorted(
         p.name for p in pkg_dir.iterdir()
-        if p.is_file() and p.name not in ("SKILL.md",) and p.name.startswith(".")
+        if p.is_file()
+        and p.name.startswith(".")
+        and p.name not in ALLOWED_ROOT_HIDDEN_FILES
     )
     checks.append(PackageCheck(
         "no_stray_hidden_files", "FAIL" if stray else "PASS",

@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SCRIPTS_DIR))
 
 from rsc_common import load_yaml  # noqa: E402
@@ -59,3 +60,16 @@ def test_stray_hidden_file_fails(workdir):
     checks = validate_package(workdir)
     by_name = {c.name: c for c in checks}
     assert by_name["no_stray_hidden_files"].status == "FAIL"
+
+
+def test_gitignore_is_an_allowed_package_support_file(workdir):
+    (workdir / ".gitignore").write_text("__pycache__/\n", encoding="utf-8")
+    checks = validate_package(workdir)
+    by_name = {c.name: c for c in checks}
+    assert by_name["no_stray_hidden_files"].status == "PASS"
+
+
+def test_repository_package_passes_own_structural_validation():
+    """Regression: validate the real package, not only the minimal fixture."""
+    checks = validate_package(PACKAGE_ROOT)
+    assert all_pass(checks), [c.to_dict() for c in checks if c.status != "PASS"]

@@ -7,7 +7,7 @@ tocado — confirmado via `git diff main --stat`.
 
 ## A. Files created
 
-33 arquivos, todos sob `.claude/skills/rech-skill-creator/`:
+36 arquivos, todos sob `.claude/skills/rech-skill-creator/`:
 
 ```
 rech-skill-creator/
@@ -31,7 +31,8 @@ rech-skill-creator/
 │   ├── eval_isolation_check.py
 │   ├── run_executor.py
 │   ├── valid_run_gate.py
-│   └── package_release_gate.py       (9 scripts — não há aggregation.py
+│   ├── artifact_integrity_gate.py
+│   └── package_release_gate.py       (10 scripts — não há aggregation.py
 │                                       separado; a lógica de agregação
 │                                       vive dentro de valid_run_gate.py e
 │                                       package_release_gate.py, já que
@@ -45,7 +46,7 @@ rech-skill-creator/
     │   ├── eval_manifest_valid.yaml
     │   ├── eval_manifest_multiline.yaml
     │   └── minimal_skill_pkg/ (SKILL.md, contract.yaml, references/notes.md, scripts/noop.py)
-    └── test_*.py (9 arquivos, 52 casos de teste)
+    └── test_*.py (9 arquivos, 55 casos de teste)
 ```
 
 **Desvio da lista literal do usuário**: `tests/fixtures/runs/run-1/` e
@@ -158,45 +159,54 @@ verificado mecanicamente via AST (defeitos #6/#11), não só por convenção.
 
 ## K. SKILLS_API validation
 
-`skills_api_validate.py` nunca retorna PASS vazio (defeito #4). 8 checks
-offline reais (frontmatter, naming, estrutura, YAML, links internos) +
-3 sempre `NOT_APPLICABLE` (`upload_registration`, `live_routing`,
-`size_report`). `overall_status()` nunca é `PASS` enquanto houver
-`UNVERIFIED` pendente. Escopo completo em `references/skills-api-scope.md`.
+`skills_api_validate.py` nunca retorna PASS vazio (defeito #4). Executado
+contra o pacote real, retorna `PASS` para todos os checks offline aplicáveis.
+`internal_link_check` é `NOT_APPLICABLE` quando existe somente
+`contract_template.yaml`: placeholders de template não são declarações de
+roteamento em runtime. `upload_registration`, `live_routing` e `size_report`
+também permanecem `NOT_APPLICABLE`, com justificativa explícita.
+`overall_status()` nunca é `PASS` enquanto houver `UNVERIFIED` pendente.
+Escopo completo em `references/skills-api-scope.md`.
 
 ## L. Packaging validation
 
 `package_validate.py` cobre presença de `SKILL.md`, parse de frontmatter,
 campos obrigatórios, tipos de arquivo permitidos por pasta, ausência de
-arquivos ocultos/estranhos, e YAML bem-formado — todo parsing via
+arquivos ocultos estranhos (com `.gitignore` explicitamente permitido), e YAML bem-formado — todo parsing via
 `rsc_common.load_yaml()`/`load_yaml_str()` exclusivamente (defeito #10),
 provado com fixture de block scalar multiline com linha-isca.
 
 ## M. Tests
 
-52 testes, `pytest -v` 100% verde (evidência completa em
+55 testes, `pytest -v` 100% verde (evidência completa em
 `tests/` — comando: `cd .claude/skills/rech-skill-creator && python3 -m
 pytest tests/ -v`). Cobre os 12 requisitos mínimos pedidos mais os 10
-defeitos numerados mais 1 achado adicional (stale manifest) mais testes de
-regressão auxiliares (cosmético-não-flagado, run pós-snapshot não perturba
-candidate, etc.).
+defeitos numerados, o achado adicional de stale manifest e regressões
+auxiliares. Inclui agora validação do pacote real por
+`test_repository_package_passes_own_structural_validation` e
+`test_repository_package_passes_own_offline_skills_api_validation`, evitando
+que fixtures verdes ocultem uma falha do artefato que será publicado.
 
 ## N. Routing validation
 
 `references/acceptance-cases.md`: 11 casos, 7 `HARD ACCEPTANCE`. Cobre
 triggers positivos, redirecionamento para as 5 skills irmãs (incluindo a
 distinção explícita entre `PACKAGE_RELEASE_GATE` e `rech-release-gate`), e
-recusa de tocar qualquer skill travada. Não executado automaticamente nesta
-rodada (são casos de comportamento de roteamento do próprio Claude, não
-scripts) — ver seção Q.
+recusa de tocar qualquer skill travada. Revisão estática/manual executada
+contra `SKILL.md`, scripts e referências: **11/11 contratos comportamentais
+estão representados**, incluindo os 7 hard acceptance. Essa revisão confirma
+as instruções e salvaguardas do pacote; não é apresentada como prova de
+seleção por um Claude real. `live_routing` permanece honestamente
+`NOT_APPLICABLE` no harness offline — ver seção Q.
 
 ## O. Structural validation
 
 `test_package_validate.py` + `test_skills_api_validate.py` confirmam que a
-fixture `minimal_skill_pkg` (usada por toda a suíte) passa em 100% dos
-checks estruturais, e que violações deliberadas (arquivo tipo errado,
-arquivo oculto estranho, nome de diretório não-kebab-case, `redirect_to`
-não resolvido) são cada uma detectada e nomeada corretamente.
+fixture `minimal_skill_pkg` e o pacote real `rech-skill-creator` passam em
+100% dos checks offline aplicáveis. Violações deliberadas (arquivo tipo
+errado, arquivo oculto estranho, nome de diretório não-kebab-case e
+`redirect_to` real não resolvido) são detectadas e nomeadas. `.gitignore` é
+permitido de forma explícita; outros arquivos ocultos continuam bloqueados.
 
 ## P. Behavioral validation
 
@@ -225,10 +235,8 @@ executada).
   reconstrução (são de outro projeto do ecossistema, RechShift), citado
   aqui só para registro de proveniência caso a menção apareça em auditoria
   futura.
-- Push feito para `feat/rech-skill-creator-v1` (recriada a partir da main
-  atual, com `--force-with-lease`, já que a branch remota tinha histórico
-  não-relacionado/obsoleto). **Sem merge** — aguardando autorização
-  explícita.
+- A branch `feat/rech-skill-creator-v1` permanece sem merge. Este relatório
+  registra a condição do candidato, mas não autoriza incorporação à `main`.
 
 ---
 
@@ -246,15 +254,21 @@ executada).
 | 9 | Schema aceita metadata | Campo obrigatório + validação de tipo | `test_schema_validator.py::test_metadata_field_accepted`, `test_metadata_missing_is_rejected` | **PASS** |
 | 10 | package_validate parseia YAML multiline | Parsing exclusivo via PyYAML safe_load | `test_package_validate.py::test_multiline_block_scalar_parsed_correctly` | **PASS** |
 | extra | Run contra manifesto obsoleto (stale) não é aceita | Checagem de manifest_sha256 por run | `test_valid_run_gate.py::test_stale_manifest_run_is_rejected` | **PASS** |
+| auditoria | Pacote real deve passar seus próprios validadores | Regressões executam package e Skills API validation contra `PACKAGE_ROOT` | `test_repository_package_passes_own_structural_validation`, `test_repository_package_passes_own_offline_skills_api_validation` | **PASS** |
 
-**10/10** defeitos numerados cobertos, mais 1 achado adicional corrigido
-durante a implementação. `pytest -v` completo: **52 passed, 0 failed**.
+**10/10** defeitos numerados cobertos, mais o stale manifest e os três
+bloqueadores encontrados na auditoria do pacote real. `pytest -v` completo:
+**55 passed, 0 failed**. Execuções diretas adicionais:
+
+- `package_validate.py --package-dir <rech-skill-creator>`: **PASS**;
+- `skills_api_validate.py --package-dir <rech-skill-creator> --skills-root <.claude/skills>`: **PASS**.
 
 ---
 
 ## VERDICT: LOCKED CANDIDATE
 
-Todos os defeitos conhecidos têm correção com teste passando. O pipeline
+Todos os defeitos conhecidos têm correção com teste passando. O pacote real
+passa seus dois validadores offline, além da suíte completa. O pipeline
 completo (`test_pipeline_end_to_end.py`) funciona ponta a ponta nos
 caminhos feliz e bloqueado. Nenhum arquivo fora de
 `.claude/skills/rech-skill-creator/` foi alterado. A divergência do padrão

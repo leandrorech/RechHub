@@ -113,3 +113,24 @@ tese, ser aceita mesmo não representando mais uma execução válida contra o
 contrato atual. Corrigido: toda run agora é rejeitada como estruturalmente
 incompleta ("stale") se seu `manifest_sha256` não bater com o snapshot
 vigente. Ver `test_valid_run_gate.py::test_stale_manifest_run_is_rejected`.
+
+## Achados da auditoria do pacote real
+
+A primeira reconstrução executava a suíte apenas sobre fixtures e declarava
+o candidato travado sem chamar os validadores contra o próprio diretório que
+seria publicado. A reprodução externa encontrou três bloqueadores:
+
+1. `SKILL.md.description` tinha 1.386 caracteres para um limite de 1.024;
+2. `.gitignore`, incluído pelo próprio pacote, era rejeitado como hidden file;
+3. `contract_template.yaml` continha o placeholder `sibling-skill-id`, que era
+   tratado incorretamente como um redirect de runtime.
+
+**Correções**: description reduzida preservando triggers e fronteiras;
+`.gitignore` permitido explicitamente sem liberar outros hidden files; e
+`internal_link_check` restrito a `contract.yaml` concreto. Um template sem
+contrato instanciado produz `NOT_APPLICABLE`, nunca um PASS fabricado.
+
+**Testes**:
+`test_package_validate.py::test_gitignore_is_an_allowed_package_support_file`,
+`test_repository_package_passes_own_structural_validation` e
+`test_skills_api_validate.py::test_repository_package_passes_own_offline_skills_api_validation`.
