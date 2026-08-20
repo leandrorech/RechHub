@@ -73,3 +73,16 @@ def test_repository_package_passes_own_structural_validation():
     """Regression: validate the real package, not only the minimal fixture."""
     checks = validate_package(PACKAGE_ROOT)
     assert all_pass(checks), [c.to_dict() for c in checks if c.status != "PASS"]
+
+
+def test_gitignore_allowance_is_not_a_blanket_exception(workdir):
+    """The .gitignore allowance must be a narrow, explicit exception - any
+    OTHER hidden file (.env, .secret, .DS_Store, etc.) must still FAIL, even
+    when .gitignore is also present."""
+    (workdir / ".gitignore").write_text("__pycache__/\n", encoding="utf-8")
+    (workdir / ".env").write_text("SECRET=1", encoding="utf-8")
+    checks = validate_package(workdir)
+    by_name = {c.name: c for c in checks}
+    assert by_name["no_stray_hidden_files"].status == "FAIL"
+    assert ".env" in by_name["no_stray_hidden_files"].detail
+    assert ".gitignore" not in by_name["no_stray_hidden_files"].detail

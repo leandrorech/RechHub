@@ -278,3 +278,26 @@ escondida.
 Ressalva não-bloqueante: as regras de roteamento (`acceptance-cases.md`)
 não foram exercitadas por um harness automatizado nesta rodada — são
 material de revisão humana, como acontece com as 5 skills irmãs.
+
+---
+
+## Fechamento final pré-LOCK (2026-08-20)
+
+O commit anterior (`fix: make rech-skill-creator self-validation truthful`)
+já resolveu, com autoria e push próprios do usuário, os bloqueadores de
+self-package validation (description ≤1024, `.gitignore` como exceção
+estrita, placeholder de `contract_template.yaml` não tratado como redirect
+real). Revisão final encontrou dois itens residuais, ambos fechados nesta
+rodada, sem alterar description/gitignore/contract já corrigidos:
+
+1. Typo `FIRMED:` remanescente na seção "Fronteira dura" — removido.
+2. Faltava um teste negativo provando que a exceção do `.gitignore` é
+   estrita (um hidden file arbitrário, ex. `.env`, ao lado do `.gitignore`,
+   continua `FAIL`, e o detail da falha cita só o arquivo inesperado) —
+   adicionado `test_gitignore_allowance_is_not_a_blanket_exception`.
+
+Evidência: `package_validate.py --package-dir .` → `PASS` (8/8,
+`description_length: 753 chars`, `no_stray_hidden_files: none found`);
+`pytest tests/ -v` → **56 passed**, 0 failed.
+
+**VERDICT: LOCKED CANDIDATE.**

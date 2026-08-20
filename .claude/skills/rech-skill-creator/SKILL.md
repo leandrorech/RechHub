@@ -40,7 +40,6 @@ que hasheia, compara e falha de forma determinística não pode.
 ## Fronteira dura
 
 ```
-FIRMED:
 - Nunca altera nenhum arquivo das 5 skills já travadas.
 - Nunca inicia outra skill nova por conta própria.
 - Nunca inventa taxonomia de severidade/evidência/status paralela a RAF.
